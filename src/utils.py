@@ -45,8 +45,9 @@ def airtable_to_csv():
     # Initialize Airtable Python SDK
     table = Table(access_token, base_id, table_id)
 
-    # Get all records from the table
-    all_records = table.all()
+    # Get all records from the table, in string format
+    # TODO: Allow user to specify time zone and locale
+    all_records = table.all(cell_format="string", time_zone='GMT', user_locale='en-US')
 
     # Extract the data from the JSON response and create a pandas DataFrame
     rows = []
