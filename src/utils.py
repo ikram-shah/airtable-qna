@@ -13,22 +13,22 @@ import pandas as pd
 from langchain.agents import create_csv_agent
 from langchain.llms import OpenAI
 
+from pyairtable import Table
+
 airtable_logo_url = "https://seeklogo.com/images/A/airtable-logo-216B9AF035-seeklogo.com.png"
 
-def transform_base_url(base_url):
+def extract_ids_from_base_url(base_url):
     """
-    Extract base ID and table name from the base URL using regular expressions
+    Extract base and table ID or name from the base URL using regular expressions
     """
     pattern = r'https://airtable.com/([\w\d]+)/(.*?)(?:/|$)'
     match = re.match(pattern, base_url)
   
     if match:
         base_id = match.group(1)
-        table_name = match.group(2)
-      
-        # Transform the base URL into the Airtable API URL format
-        api_url = f'https://api.airtable.com/v0/{base_id}/{table_name}'
-        return api_url
+        table_id = match.group(2)
+
+        return dict(base_id=base_id, table_id=table_id)
     else:
         raise ValueError("Invalid base URL")
 
@@ -37,20 +37,20 @@ def airtable_to_csv():
     Convert Airtable contents into csv
     """
     access_token = st.session_state["AIRTABLE_PAT"]
-    base_url = st.session_state["AIRTABLE_URL"]
+    
+    # Extract the base and table ID from the base URL
+    ids_from_url = extract_ids_from_base_url(st.session_state["AIRTABLE_URL"]) 
+    base_id, table_id = ids_from_url['base_id'], ids_from_url['table_id']
+    
+    # Initialize Airtable Python SDK
+    table = Table(access_token, base_id, table_id)
 
-    # Set headers for the API request
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-    }
-
-    # Make the API request to get the records
-    response = requests.get(transform_base_url(base_url), headers=headers)
-    data = response.json()["records"]
+    # Get all records from the table
+    all_records = table.all()
 
     # Extract the data from the JSON response and create a pandas DataFrame
     rows = []
-    for record in data:
+    for record in all_records:
         row = record['fields']
         row['id'] = record['id']
         rows.append(row)
@@ -59,6 +59,7 @@ def airtable_to_csv():
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         df.to_csv(tmp_file.name, index=False)
 
+    print(tmp_file.name)
     return tmp_file.name
 
 def clear_submit():
