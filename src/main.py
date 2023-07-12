@@ -1,5 +1,5 @@
 """
-Airtable-QA
+Airtable-QnA
 """
 
 import streamlit as st
@@ -15,11 +15,8 @@ from utils import (
 set_logo_and_page_config()
 set_sidebar()
 
-st.caption('⚠️ This is experimental implementation, works for tables under 100 records due to Airtable WebAPI limitations.')
-query = st.text_area("NOTE - Inspired from [Langchain CSV Agent](https://python.langchain.com/en/latest/modules/agents/toolkits/examples/csv.html). \n"
-        "This agent calls the Pandas DataFrame agent under the hood, which in turn calls the Python agent, \n" 
-        "which executes LLM generated Python code - this can be bad if the LLM generated Python code is harmful. **Use cautiously**."            ,
-        label_visibility="visible", placeholder="Ask anything...", on_change=clear_submit)
+query = st.text_area("Ask anything to your Airtable records \n ",label_visibility="visible", placeholder="How many records have...?", on_change=clear_submit)
+
 button = st.button("Search")
 
 if button or st.session_state.get("submit"):

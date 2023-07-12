@@ -11,11 +11,13 @@ import requests
 import pandas as pd
 
 from langchain.agents import create_csv_agent
-from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
+from langchain.agents.agent_types import AgentType
 
 from pyairtable import Table
 
 airtable_logo_url = "https://seeklogo.com/images/A/airtable-logo-216B9AF035-seeklogo.com.png"
+models = ["gpt-3.5-turbo", "gpt-4", "gpt-4-0613", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k", "gpt-3.5-turbo-16k-0613"]
 
 def extract_ids_from_base_url(base_url):
     """
@@ -59,7 +61,6 @@ def airtable_to_csv():
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
         df.to_csv(tmp_file.name, index=False)
 
-    print(tmp_file.name)
     return tmp_file.name
 
 def clear_submit():
@@ -73,7 +74,8 @@ def run_agent(file_name, query):
     Runs the agent on the given file with the specified query.
     """
     openai_key = st.session_state["OPENAI_API_KEY"]
-    agent = create_csv_agent(OpenAI(temperature=0, openai_api_key=openai_key), file_name, verbose=True)
+    openai_model_chosen = st.session_state["OPENAI_MODEL_CHOSEN"]
+    agent = create_csv_agent(ChatOpenAI(openai_api_key=openai_key, model=openai_model_chosen, temperature=0), file_name, verbose=True, agent_type=AgentType.OPENAI_FUNCTIONS, agent_executor_kwargs={"handle_parsing_errors":True})
     return agent.run(query).__str__()
 
 def validate_api_key(api_key_input):
@@ -106,30 +108,28 @@ def set_logo_and_page_config():
     """
     response = requests.get(airtable_logo_url)
     im = Image.open(BytesIO(response.content))
-    st.set_page_config(page_title="Airtable-QA", page_icon=im, layout="wide")
+    st.set_page_config(page_title="Airtable-QnA", page_icon=im, layout="wide")
     st.image(airtable_logo_url, width=50)
-    st.header("Airtable-QA")
+    st.header("Airtable-QnA")
     
 def populate_markdown():
     """
     Populates markdown for sidebar.
     """
-    st.markdown(
-            "## How to use\n"
-            "1. Enter your [OpenAI API key](https://platform.openai.com/account/api-keys) below 🔑\n" 
-            "2. Enter your Airtable Personal Access Token & Base URL 🔑\n"
-            "3. Ask any question that can be answered from Airtable Base💬\n")
+    st.markdown("## Configuration")
+    st.write("\n")
+    st.session_state["OPENAI_MODEL_CHOSEN"] = st.selectbox('OpenAI Model', models, key='model', help="Learn more at [OpenAI Documentation](https://platform.openai.com/docs/models/)")
     api_key_input = st.text_input(
             "OpenAI API Key",
             type="password",
             placeholder="sk-...",
-            help="You can get your API key from https://platform.openai.com/account/api-keys", 
+            help="You can get your API key from [OpenAI Platform](https://platform.openai.com/account/api-keys)", 
             value=st.session_state.get("OPENAI_API_KEY", ""))
     airtable_pat_input = st.text_input(
             "Airtable Personal Access Token",
             type="password",
             placeholder="pat...",
-            help="You can get your Airtable PAT from https://airtable.com/developers/web/guides/personal-access-tokens#creating-a-token",
+            help="You can get your Airtable PAT from [Airtable](https://airtable.com/developers/web/guides/personal-access-tokens#creating-a-token)",
             value=st.session_state.get("AIRTABLE_PAT", ""))
     airtable_base_url_input = st.text_input(
             "Airtable Base URL",

@@ -59,7 +59,5 @@ def setup():
             set_airtable_base_url(airtable_base_url_input)
 
         st.markdown("---")
-        st.markdown(
-            "This tool is a work in progress. You can contribute to the project on [GitHub](https://github.com/ikram-shah/airtable-qna)"
-        )
-        st.markdown("Made by [ikramshah](https://twitter.com/ikram_shah_v)")
+        st.caption('⚠️ Experimental Implementation.')
+        st.markdown("[Github](https://github.com/ikram-shah/airtable-qna)" + " | " + "[Twitter](https://twitter.com/ikram_shah)")
