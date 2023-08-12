@@ -4,7 +4,7 @@
 
 💪 Built with [LangChain](https://github.com/hwchase17/langchain) & [Streamlit](https://streamlit.io/)
 
-<img width="700" alt="Screenshot 2023-05-23 at 5 21 09 PM" src="https://github.com/ikram-shah/airtable-qna/assets/17762967/2d1efbdc-e8bb-41f1-972d-fba6abe9ff1f">
+<img width="700" alt="Airtable QnA Application Screenshot that includes the configuration and options to ask question" src="https://github.com/ikram-shah/airtable-qna/assets/17762967/84b5516e-7b05-4146-b672-fceaa86f9ce6">
 
 https://airtable-qna.streamlit.app
 
